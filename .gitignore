@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Production Build
+frontend/dist/
+frontend/build/
+
+# Secrets & Config
+.env
+*.local
+backend/config.php
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+error_log
+
+# Uploads (Ignore uploaded files but keep directories)
+api/uploads/images/*
+!api/uploads/images/.gitkeep
+api/uploads/manuals/*
+!api/uploads/manuals/.gitkeep
