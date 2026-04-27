@@ -1,15 +1,16 @@
 -- phpMyAdmin SQL Dump
--- วางแผนฐานข้อมูลระบบบันทึกการใช้งานเครื่องมือ (Instrument Usage System)
+-- ระบบบันทึกการใช้งานเครื่องมือ (Instrument Usage System)
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+07:00";
 
+-- สร้าง Database
 CREATE DATABASE IF NOT EXISTS `instrument_usage` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `instrument_usage`;
 
 -- 1. users
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL UNIQUE,
   `password` varchar(255) NOT NULL,
@@ -24,23 +25,23 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 2. buildings
-CREATE TABLE `buildings` (
+CREATE TABLE IF NOT EXISTS `buildings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(150) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 3. rooms
-CREATE TABLE `rooms` (
+CREATE TABLE IF NOT EXISTS `rooms` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `building_id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`building_id`) REFERENCES `buildings`(`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_room_building` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 4. instruments
-CREATE TABLE `instruments` (
+CREATE TABLE IF NOT EXISTS `instruments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `room_id` int(11) NOT NULL,
   `name` varchar(200) NOT NULL,
@@ -52,11 +53,11 @@ CREATE TABLE `instruments` (
   `status` enum('active','maintenance') NOT NULL DEFAULT 'active',
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`room_id`) REFERENCES `rooms`(`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_instrument_room` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 5. usage_logs (Check-in / Check-out ผ่าน QR Code)
-CREATE TABLE `usage_logs` (
+CREATE TABLE IF NOT EXISTS `usage_logs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `instrument_id` int(11) NOT NULL,
@@ -65,12 +66,12 @@ CREATE TABLE `usage_logs` (
   `feedback` text,
   `feedback_image` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`instrument_id`) REFERENCES `instruments`(`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_log_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_log_instrument` FOREIGN KEY (`instrument_id`) REFERENCES `instruments` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 6. bookings (ระบบจอง)
-CREATE TABLE `bookings` (
+CREATE TABLE IF NOT EXISTS `bookings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `instrument_id` int(11) NOT NULL,
@@ -79,12 +80,12 @@ CREATE TABLE `bookings` (
   `status` enum('pending','approved','cancelled') NOT NULL DEFAULT 'pending',
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`instrument_id`) REFERENCES `instruments`(`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_booking_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_booking_instrument` FOREIGN KEY (`instrument_id`) REFERENCES `instruments` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 7. maintenance (แจ้งซ่อม / เบิกอะไหล่)
-CREATE TABLE `maintenance` (
+CREATE TABLE IF NOT EXISTS `maintenance` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `instrument_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
@@ -93,13 +94,12 @@ CREATE TABLE `maintenance` (
   `repair_status` enum('reported','in_progress','completed') NOT NULL DEFAULT 'reported',
   `report_date` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`instrument_id`) REFERENCES `instruments`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_maint_instrument` FOREIGN KEY (`instrument_id`) REFERENCES `instruments` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_maint_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Dummy Data (Admin)
-INSERT INTO `users` (`username`, `password`, `first_name`, `last_name`, `email`, `role`) VALUES
+-- เพิ่มข้อมูล Admin เริ่มต้น (Username: admin, Password: password)
+INSERT IGNORE INTO `users` (`username`, `password`, `first_name`, `last_name`, `email`, `role`) VALUES
 ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'System', 'Admin', 'admin@example.com', 'admin');
--- (Password is "password")
 
 COMMIT;
