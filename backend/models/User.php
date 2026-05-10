@@ -16,28 +16,46 @@ class User {
         return $stmt;
     }
 
-    public function findByUsername($username) {
-        $query = "SELECT * FROM " . $this->table . " WHERE username = ?";
+    public function findByLogin($username) {
+        // Find by username or student_id or email
+        $query = "SELECT u.*, r.name as role 
+                  FROM " . $this->table . " u
+                  JOIN roles r ON u.role_id = r.id
+                  WHERE u.username = ? OR u.student_id = ? OR u.email = ?
+                  LIMIT 1";
         $stmt = $this->conn->prepare($query);
-        $stmt->execute([$username]);
+        $stmt->execute([$username, $username, $username]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function updateLastLogin($id) {
+        $query = "UPDATE " . $this->table . " SET last_login = CURRENT_TIMESTAMP WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([$id]);
+    }
+
     public function create($data) {
+        $stmtRole = $this->conn->prepare("SELECT id FROM roles WHERE name = ?");
+        $stmtRole->execute([$data['role'] ?? 'student']);
+        $role = $stmtRole->fetch(PDO::FETCH_ASSOC);
+        $role_id = $role ? $role['id'] : 3;
+
         $query = "INSERT INTO " . $this->table . " 
-                  (username, password, first_name, last_name, student_id, phone, email, role) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                  (role_id, username, student_id, first_name, last_name, email, phone, password_hash, faculty, department) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->conn->prepare($query);
         
         return $stmt->execute([
+            $role_id,
             $data['username'],
-            $data['password'],
+            $data['student_id'] ?? null,
             $data['first_name'],
             $data['last_name'],
-            $data['student_id'],
-            $data['phone'],
             $data['email'],
-            $data['role']
+            $data['phone'] ?? null,
+            $data['password_hash'],
+            $data['faculty'] ?? null,
+            $data['department'] ?? null
         ]);
     }
 }

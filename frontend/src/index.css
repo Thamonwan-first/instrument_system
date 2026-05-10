@@ -1,11 +1,83 @@
 @import "tailwindcss";
 
+:root {
+  --brand-orange: #F27C38;
+  --brand-gold: #C9A44C;
+  --brand-sand: #EAD7C2;
+  --brand-charcoal: #2B2B2B;
+  --brand-bg: #f8f2eb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f3f4f6;
+  color: var(--brand-charcoal);
+  background:
+    radial-gradient(circle at top left, rgba(242, 124, 56, 0.16), transparent 30%),
+    radial-gradient(circle at top right, rgba(201, 164, 76, 0.14), transparent 26%),
+    linear-gradient(180deg, #fffaf5 0%, var(--brand-bg) 100%);
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(242, 124, 56, 0.22);
+  color: var(--brand-charcoal);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #dec1b3;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #c9a44c;
+}
+
+/* Directory Tree Connectors */
+.tree-connector {
+  position: relative;
+}
+
+.tree-connector::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 0;
+  bottom: 12px;
+  width: 1px;
+  background: #dec1b3;
+}
+
+.tree-connector::after {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 12px;
+  width: 8px;
+  height: 1px;
+  background: #dec1b3;
 }

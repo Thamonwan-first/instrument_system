@@ -27,7 +27,4 @@ desktop.ini
 error_log
 
 # Uploads (Ignore uploaded files but keep directories)
-api/uploads/images/*
-!api/uploads/images/.gitkeep
-api/uploads/manuals/*
-!api/uploads/manuals/.gitkeep
+ีuploads/
